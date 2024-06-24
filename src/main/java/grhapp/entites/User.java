@@ -13,10 +13,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "users", 
@@ -25,8 +22,6 @@ import lombok.AllArgsConstructor;
       @UniqueConstraint(columnNames = "email") 
     })
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 
 public class User {
   @Id
@@ -91,7 +86,6 @@ public void setRoles(Set<Role> roles) {
 }
 
 public User() {
-	super();
 }
   
 }
