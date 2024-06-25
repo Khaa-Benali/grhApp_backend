@@ -1,5 +1,7 @@
-# Utilise une image de base Java
-FROM openjdk:17-jdk-slim
+FROM alpine:latest
+
+# Installation d'OpenJDK 17
+RUN apk --no-cache add openjdk17-jre
 
 # Exposer le port que l'application va utiliser
 EXPOSE 8080
