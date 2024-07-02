@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/mysql"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-sql-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:latest
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootroot"
+        - name: MYSQL_DATABASE
+          value: "grhapp"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-backend
+  template:
+    metadata:
+      labels:
+        app: spring-backend
+    spec:
+      containers:
+      - name: spring-backend
+        image: khadijabenali/backdockerimage:tag123
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://mysql:3306/grhapp
+        - name: SPRING_DATASOURCE_USERNAME
+          value: root
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: rootroot
+        - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+          value: com.mysql.cj.jdbc.Driver
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: update
+        - name: SPRING_JPA_SHOW_SQL
+          value: "true"
+        ports:
+        - containerPort: 8090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-backend
+spec:
+  ports:
+  - port: 8090
+    targetPort: 8090
+    nodePort: 30090
+  selector:
+    app: spring-backend
