@@ -102,6 +102,7 @@ kind: Service
 metadata:
   name: spring-backend
 spec:
+  type: NodePort
   ports:
   - port: 8090
     targetPort: 8090
